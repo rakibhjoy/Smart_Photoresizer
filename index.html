@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Smart Image Resizer Tool - Resize, compress and convert images online for free. Supports batch processing, multiple formats, and preset sizes.">
+    <meta name="theme-color" content="#6366f1">
+    <title>Smart Image Resizer Tool</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🖼️</text></svg>">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: ['selector', '[data-theme="dark"]'],
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50:'#eef2ff',100:'#e0e7ff',200:'#c7d2fe',300:'#a5b4fc',400:'#818cf8',500:'#6366f1',600:'#4f46e5',700:'#4338ca',800:'#3730a3',900:'#312e81' },
+                        surface: { light:'#ffffff', dark:'#1e1e2e' },
+                    },
+                    fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <!-- Pica.js for high-quality resizing -->
+    <script src="https://cdn.jsdelivr.net/npm/pica@9.0.1/dist/pica.min.js"></script>
+
+    <!-- GSAP for animations -->
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="font-sans antialiased transition-colors duration-500 bg-gradient-to-br from-slate-50 via-white to-indigo-50 dark:from-gray-950 dark:via-gray-900 dark:to-indigo-950 text-gray-900 dark:text-gray-100 min-h-screen">
+
+    <!-- ========== NAVBAR ========== -->
+    <nav class="fixed top-0 left-0 right-0 z-50 nav-glass">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-16">
+                <a href="#" class="flex items-center gap-2 group">
+                    <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center shadow-lg shadow-primary-500/30 group-hover:shadow-primary-500/50 transition-shadow">
+                        <i data-lucide="image" class="w-5 h-5 text-white"></i>
+                    </div>
+                    <span class="text-lg font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent">SmartResize</span>
+                </a>
+                <div class="flex items-center gap-3">
+                    <button id="themeToggle" class="relative w-14 h-7 rounded-full bg-gray-200 dark:bg-gray-700 transition-colors p-0.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:focus:ring-offset-gray-900" aria-label="Toggle dark mode">
+                        <div class="theme-toggle-knob w-6 h-6 rounded-full bg-white shadow-md flex items-center justify-center transition-transform duration-300">
+                            <i data-lucide="sun" class="w-3.5 h-3.5 text-amber-500 sun-icon"></i>
+                            <i data-lucide="moon" class="w-3.5 h-3.5 text-indigo-400 moon-icon hidden"></i>
+                        </div>
+                    </button>
+                    <a href="https://github.com" target="_blank" rel="noopener" class="p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors" aria-label="GitHub">
+                        <i data-lucide="github" class="w-5 h-5"></i>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ========== HERO SECTION ========== -->
+    <header class="pt-28 pb-16 px-4 sm:px-6 lg:px-8 text-center relative overflow-hidden">
+        <div class="hero-glow"></div>
+        <div class="max-w-4xl mx-auto relative z-10">
+            <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-100 dark:bg-primary-900/40 text-primary-700 dark:text-primary-300 text-sm font-medium mb-6 animate-fade-in">
+                <i data-lucide="zap" class="w-4 h-4"></i>
+                Free &bull; Fast &bull; No Upload Limits
+            </div>
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight mb-6 animate-fade-in-up">
+                Smart Image
+                <span class="bg-gradient-to-r from-primary-500 via-purple-500 to-pink-500 bg-clip-text text-transparent"> Resizer Tool</span>
+            </h1>
+            <p class="text-lg sm:text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto mb-8 animate-fade-in-up animation-delay-100">
+                Resize, compress &amp; convert your images with pixel-perfect quality. 
+                Batch processing, social media presets, and more — all in your browser.
+            </p>
+            <div class="flex flex-wrap items-center justify-center gap-4 text-sm text-gray-500 dark:text-gray-400 animate-fade-in-up animation-delay-200">
+                <span class="flex items-center gap-1.5"><i data-lucide="shield-check" class="w-4 h-4 text-green-500"></i> 100% Private</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="cloud-off" class="w-4 h-4 text-blue-500"></i> Works Offline</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="layers" class="w-4 h-4 text-purple-500"></i> Batch Support</span>
+                <span class="flex items-center gap-1.5"><i data-lucide="sparkles" class="w-4 h-4 text-amber-500"></i> High Quality</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ========== MAIN APP ========== -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-20">
+
+        <!-- Upload Section -->
+        <section id="uploadSection" class="mb-12 animate-on-scroll">
+            <div id="dropZone" class="upload-zone group cursor-pointer relative overflow-hidden rounded-2xl border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary-400 dark:hover:border-primary-500 bg-white/60 dark:bg-gray-900/60 backdrop-blur-xl transition-all duration-300 p-8 sm:p-12 text-center" tabindex="0" role="button" aria-label="Upload images">
+                <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+                <div class="upload-content">
+                    <div class="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-primary-100 to-primary-200 dark:from-primary-900/50 dark:to-primary-800/50 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <i data-lucide="upload-cloud" class="w-10 h-10 text-primary-500"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold mb-2">Drop images here or click to browse</h3>
+                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-4">Supports JPG, PNG, WebP, GIF, BMP, TIFF &bull; Max 50MB per file</p>
+                    <button type="button" class="inline-flex items-center gap-2 px-6 py-2.5 bg-primary-600 hover:bg-primary-700 text-white rounded-xl font-medium shadow-lg shadow-primary-500/25 hover:shadow-primary-500/40 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2">
+                        <i data-lucide="folder-open" class="w-4 h-4"></i>
+                        Choose Files
+                    </button>
+                </div>
+                <div class="upload-drag-overlay hidden absolute inset-0 bg-primary-500/10 dark:bg-primary-500/20 backdrop-blur-sm rounded-2xl flex items-center justify-center">
+                    <div class="text-primary-600 dark:text-primary-400 text-xl font-semibold flex items-center gap-3">
+                        <i data-lucide="download" class="w-8 h-8 animate-bounce"></i>
+                        Drop to upload
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Batch Files List -->
+        <section id="batchSection" class="hidden mb-8 animate-on-scroll">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold flex items-center gap-2">
+                    <i data-lucide="images" class="w-5 h-5 text-primary-500"></i>
+                    Uploaded Images
+                    <span id="fileCount" class="text-sm font-normal text-gray-500 dark:text-gray-400">(0)</span>
+                </h3>
+                <div class="flex gap-2">
+                    <button id="addMoreBtn" class="btn-secondary text-sm">
+                        <i data-lucide="plus" class="w-4 h-4"></i> Add More
+                    </button>
+                    <button id="clearAllBtn" class="btn-secondary text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i> Clear All
+                    </button>
+                </div>
+            </div>
+            <div id="fileList" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3"></div>
+        </section>
+
+        <!-- Editor Section -->
+        <section id="editorSection" class="hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+                <!-- ===== Control Panel (Left) ===== -->
+                <div class="lg:col-span-4 xl:col-span-3 space-y-5">
+
+                    <!-- Dimensions Card -->
+                    <div class="card animate-on-scroll">
+                        <h3 class="card-title">
+                            <i data-lucide="ruler" class="w-5 h-5 text-primary-500"></i>
+                            Dimensions
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-end gap-3">
+                                <div class="flex-1">
+                                    <label for="widthInput" class="label">Width (px)</label>
+                                    <input type="number" id="widthInput" min="1" max="10000" class="input-field" placeholder="Width">
+                                </div>
+                                <button id="lockAspect" class="p-2.5 rounded-xl bg-primary-100 dark:bg-primary-900/40 text-primary-600 dark:text-primary-400 hover:bg-primary-200 dark:hover:bg-primary-900/60 transition-colors mb-0.5" title="Lock aspect ratio" aria-label="Lock aspect ratio">
+                                    <i data-lucide="lock" class="w-5 h-5" id="lockIcon"></i>
+                                </button>
+                                <div class="flex-1">
+                                    <label for="heightInput" class="label">Height (px)</label>
+                                    <input type="number" id="heightInput" min="1" max="10000" class="input-field" placeholder="Height">
+                                </div>
+                            </div>
+                            <div class="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 rounded-lg px-3 py-2">
+                                <span>Original: <strong id="originalDimensions" class="text-gray-700 dark:text-gray-300">—</strong></span>
+                                <span>Scale: <strong id="scalePercent" class="text-primary-600 dark:text-primary-400">100%</strong></span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Presets Card -->
+                    <div class="card animate-on-scroll">
+                        <h3 class="card-title">
+                            <i data-lucide="layout-grid" class="w-5 h-5 text-primary-500"></i>
+                            Social Media Presets
+                        </h3>
+                        <div class="grid grid-cols-2 gap-2" id="presetGrid">
+                            <button class="preset-btn" data-w="1080" data-h="1080" data-name="Instagram Post">
+                                <span class="preset-icon">📸</span>
+                                <span class="preset-label">Instagram Post</span>
+                                <span class="preset-size">1080×1080</span>
+                            </button>
+                            <button class="preset-btn" data-w="1080" data-h="1920" data-name="Instagram Story">
+                                <span class="preset-icon">📱</span>
+                                <span class="preset-label">IG Story</span>
+                                <span class="preset-size">1080×1920</span>
+                            </button>
+                            <button class="preset-btn" data-w="1200" data-h="630" data-name="Facebook Post">
+                                <span class="preset-icon">👤</span>
+                                <span class="preset-label">Facebook</span>
+                                <span class="preset-size">1200×630</span>
+                            </button>
+                            <button class="preset-btn" data-w="1500" data-h="500" data-name="Twitter Header">
+                                <span class="preset-icon">🐦</span>
+                                <span class="preset-label">Twitter/X</span>
+                                <span class="preset-size">1500×500</span>
+                            </button>
+                            <button class="preset-btn" data-w="1280" data-h="720" data-name="YouTube Thumbnail">
+                                <span class="preset-icon">▶️</span>
+                                <span class="preset-label">YouTube</span>
+                                <span class="preset-size">1280×720</span>
+                            </button>
+                            <button class="preset-btn" data-w="150" data-h="150" data-name="Thumbnail">
+                                <span class="preset-icon">🖼️</span>
+                                <span class="preset-label">Thumbnail</span>
+                                <span class="preset-size">150×150</span>
+                            </button>
+                            <button class="preset-btn" data-w="2560" data-h="1440" data-name="2K Wallpaper">
+                                <span class="preset-icon">🖥️</span>
+                                <span class="preset-label">2K Wallpaper</span>
+                                <span class="preset-size">2560×1440</span>
+                            </button>
+                            <button class="preset-btn" data-w="800" data-h="600" data-name="Custom">
+                                <span class="preset-icon">✏️</span>
+                                <span class="preset-label">Custom</span>
+                                <span class="preset-size">Any size</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quality Card -->
+                    <div class="card animate-on-scroll">
+                        <h3 class="card-title">
+                            <i data-lucide="sliders-horizontal" class="w-5 h-5 text-primary-500"></i>
+                            Quality & Format
+                        </h3>
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <label for="qualitySlider" class="label !mb-0">Compression Quality</label>
+                                    <span id="qualityValue" class="text-sm font-semibold text-primary-600 dark:text-primary-400">90%</span>
+                                </div>
+                                <input type="range" id="qualitySlider" min="10" max="100" value="90" class="quality-slider w-full">
+                            </div>
+                            <div>
+                                <label class="label">Output Format</label>
+                                <div class="grid grid-cols-3 gap-2">
+                                    <button class="format-btn active" data-format="image/jpeg" data-ext="jpg">JPG</button>
+                                    <button class="format-btn" data-format="image/png" data-ext="png">PNG</button>
+                                    <button class="format-btn" data-format="image/webp" data-ext="webp">WebP</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Actions Card -->
+                    <div class="card animate-on-scroll">
+                        <button id="resizeBtn" class="w-full btn-primary text-base py-3" disabled>
+                            <i data-lucide="scaling" class="w-5 h-5"></i>
+                            Resize Image
+                        </button>
+                        <button id="resizeAllBtn" class="hidden w-full btn-primary text-base py-3 mt-3 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700" disabled>
+                            <i data-lucide="layers" class="w-5 h-5"></i>
+                            Resize All Images
+                        </button>
+                    </div>
+                </div>
+
+                <!-- ===== Preview Panel (Right) ===== -->
+                <div class="lg:col-span-8 xl:col-span-9 space-y-5">
+
+                    <!-- Preview Card -->
+                    <div class="card animate-on-scroll">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="card-title !mb-0">
+                                <i data-lucide="eye" class="w-5 h-5 text-primary-500"></i>
+                                Preview
+                            </h3>
+                            <div class="flex items-center gap-2">
+                                <button id="compareToggle" class="btn-secondary text-xs hidden">
+                                    <i data-lucide="columns-2" class="w-3.5 h-3.5"></i>
+                                    Compare
+                                </button>
+                                <button id="zoomIn" class="btn-icon" title="Zoom in"><i data-lucide="zoom-in" class="w-4 h-4"></i></button>
+                                <button id="zoomOut" class="btn-icon" title="Zoom out"><i data-lucide="zoom-out" class="w-4 h-4"></i></button>
+                                <button id="zoomFit" class="btn-icon" title="Fit to view"><i data-lucide="maximize-2" class="w-4 h-4"></i></button>
+                            </div>
+                        </div>
+
+                        <!-- Preview Container -->
+                        <div id="previewContainer" class="preview-area rounded-xl bg-[repeating-conic-gradient(#e5e7eb_0%_25%,transparent_0%_50%)] dark:bg-[repeating-conic-gradient(#374151_0%_25%,transparent_0%_50%)] bg-[length:20px_20px] min-h-[300px] sm:min-h-[400px] flex items-center justify-center relative overflow-hidden">
+                            <div id="previewPlaceholder" class="text-center text-gray-400 dark:text-gray-600 py-16">
+                                <i data-lucide="image" class="w-16 h-16 mx-auto mb-4 opacity-40"></i>
+                                <p class="text-lg font-medium">No image loaded</p>
+                                <p class="text-sm">Upload an image to see preview here</p>
+                            </div>
+                            <img id="previewImage" class="hidden max-w-full max-h-[500px] object-contain transition-transform duration-200 rounded-lg shadow-lg" alt="Preview">
+                            
+                            <!-- Comparison Slider -->
+                            <div id="comparisonContainer" class="hidden absolute inset-0">
+                                <div class="comparison-wrapper w-full h-full relative">
+                                    <img id="compareOriginal" class="absolute inset-0 w-full h-full object-contain" alt="Original">
+                                    <div id="compareResized" class="absolute inset-0 overflow-hidden" style="width: 50%">
+                                        <img id="compareResizedImg" class="absolute inset-0 w-full h-full object-contain" alt="Resized" style="min-width: 100%">
+                                    </div>
+                                    <div id="comparisonSlider" class="absolute top-0 bottom-0 w-1 bg-white shadow-lg cursor-ew-resize" style="left: 50%">
+                                        <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 rounded-full bg-white shadow-xl flex items-center justify-center">
+                                            <i data-lucide="move-horizontal" class="w-5 h-5 text-gray-700"></i>
+                                        </div>
+                                    </div>
+                                    <div class="absolute top-3 left-3 px-2 py-1 bg-black/60 text-white text-xs rounded-md font-medium">Original</div>
+                                    <div class="absolute top-3 right-3 px-2 py-1 bg-primary-600/90 text-white text-xs rounded-md font-medium">Resized</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stats & Download Card -->
+                    <div id="resultsSection" class="hidden animate-on-scroll">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-5">
+                            <div class="stat-card">
+                                <div class="stat-icon bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400">
+                                    <i data-lucide="file-image" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="stat-label">Original Size</p>
+                                    <p id="originalSize" class="stat-value">—</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400">
+                                    <i data-lucide="file-check" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="stat-label">Resized Size</p>
+                                    <p id="resizedSize" class="stat-value">—</p>
+                                </div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-icon bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400">
+                                    <i data-lucide="percent" class="w-5 h-5"></i>
+                                </div>
+                                <div>
+                                    <p class="stat-label">Saved</p>
+                                    <p id="savedPercent" class="stat-value">—</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <button id="downloadBtn" class="flex-1 btn-primary py-3 text-base">
+                                    <i data-lucide="download" class="w-5 h-5"></i>
+                                    Download Image
+                                </button>
+                                <button id="downloadAllBtn" class="hidden flex-1 btn-primary py-3 text-base bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700">
+                                    <i data-lucide="archive" class="w-5 h-5"></i>
+                                    Download All
+                                </button>
+                                <button id="resetBtn" class="btn-secondary py-3">
+                                    <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+                                    Reset
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- ========== FOOTER ========== -->
+    <footer class="border-t border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/50 backdrop-blur-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-primary-500 to-primary-700 flex items-center justify-center">
+                        <i data-lucide="image" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="font-semibold text-sm">SmartResize</span>
+                </div>
+                <p class="text-sm text-gray-500 dark:text-gray-400">
+                    &copy; 2026 SmartResize. Developed by 
+                    <a href="https://www.linkedin.com/in/mdrakibhjoy/" target="_blank" rel="noopener" class="text-primary-600 dark:text-primary-400 hover:underline font-semibold">Md Rakib Hasan</a>
+                </p>
+                <div class="flex items-center gap-4 text-sm text-gray-500 dark:text-gray-400">
+                    <span class="flex items-center gap-1"><i data-lucide="lock" class="w-3.5 h-3.5"></i> Private</span>
+                    <span class="flex items-center gap-1"><i data-lucide="wifi-off" class="w-3.5 h-3.5"></i> Offline Ready</span>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Toast Container -->
+    <div id="toastContainer" class="fixed bottom-6 right-6 z-50 space-y-3"></div>
+
+    <!-- Processing Overlay -->
+    <div id="processingOverlay" class="hidden fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center">
+        <div class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-2xl text-center max-w-sm mx-4">
+            <div class="processing-spinner mx-auto mb-4"></div>
+            <h3 class="text-lg font-semibold mb-2">Processing...</h3>
+            <p id="processingText" class="text-sm text-gray-500 dark:text-gray-400">Resizing your image with high quality</p>
+            <div class="mt-4 w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2">
+                <div id="processingBar" class="bg-primary-500 h-2 rounded-full transition-all duration-300" style="width: 0%"></div>
+            </div>
+        </div>
+    </div>
+
+    <canvas id="resizeCanvas" class="hidden"></canvas>
+    <script src="script.js"></script>
+</body>
+</html>

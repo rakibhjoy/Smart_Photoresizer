@@ -1,0 +1,19 @@
+{
+    "name": "Smart Image Resizer",
+    "short_name": "SmartResize",
+    "description": "Resize, compress & convert images with pixel-perfect quality — all in your browser.",
+    "start_url": ".",
+    "display": "standalone",
+    "background_color": "#ffffff",
+    "theme_color": "#6366f1",
+    "orientation": "any",
+    "categories": ["utilities", "photo"],
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%236366f1'/><text x='256' y='380' font-size='320' text-anchor='middle' fill='white'>🖼️</text></svg>",
+            "sizes": "512x512",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ]
+}
